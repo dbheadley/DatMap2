@@ -81,7 +81,6 @@ seqRef = regionprops(syncRef,{'Area' 'PixelIdxList'});
 
 % align pulse sequences
 pulseAligns = MeasureAlignment(vertcat(seqRef.Area),vertcat(seqVid.Area));
-pulseAligns(any(isnan(pulseAligns),2),:) = [];
 pulseEdgesVid = cellfun(@(x)x(1),{seqVid(pulseAligns(:,2)).PixelIdxList});
 pulseEdgesRef = cellfun(@(x)x(1),{seqRef(pulseAligns(:,1)).PixelIdxList});
 pulseEdgesVid = pulseEdgesVid(:);
@@ -122,54 +121,3 @@ tVid = [tVid tVid(end) + ((1:remTPts)*medDT)];
 vidFID = fopen(fullfile(dirVid,[fNameVid '_AVI_t.dat']),'w');
 fwrite(vidFID,tVid,'double');
 fclose(vidFID);
-
-end
-
-function seqPairs = MeasureAlignment(ser1, ser2)
-    % seqPairs are the matched entries in ser1 and ser2. For every matched
-    % pair the index of the entry in ser1 is given in column 1, and the
-    % corresponding entry in ser2 is given in column 2.
-    ser1 = zscore(ser1(:));
-    ser2 = zscore(ser2(:));
-    diffMat = abs(repmat(ser1,1,length(ser2))-repmat(ser2',length(ser1),1));
-    diffMat = bwareaopen(imopen(diffMat<1,eye(30)),30);
-%     rows = size(diffMat,1);
-%     cols = size(diffMat,2);
-%     if rows < cols
-%         diffMat = [diffMat; zeros(cols-rows,cols)];
-%     else
-%         diffMat = [diffMat, zeros(rows, rows-cols)];
-%     end
-%     for i = [-size(diffMat,1):-500, 500:size(diffMat,1)]
-%         diffMat = diffMat - diag(diag(diffMat, i),i);
-%     end
-%     diffMat=diffMat(1:rows,1:cols);
-
-    seqPairs = [];
-    ser1Pt = 1;
-    ser2Pt = 1;
-    waitH = waitbar(0,'Aligning pulse sequences');
-    while ((ser1Pt <= (length(ser1))) && (ser2Pt <= length(ser2)))
-        waitbar(ser1Pt/length(ser1),waitH);
-        if ~diffMat(ser1Pt,ser2Pt)
-            newStart = find(diffMat(ser1Pt,ser2Pt:end),1,'first');
-            if ~isempty(newStart)
-                seqPairs(end+1,2) = ser2Pt+newStart-1;
-                seqPairs(end,1) = ser1Pt;
-                ser2Pt = ser2Pt+newStart;
-                ser1Pt = ser1Pt+1;
-            else
-                seqPairs(end+1,2) = nan;
-                seqPairs(end,1) = ser1Pt;
-                ser1Pt = ser1Pt+1;
-            end
-        else
-            seqPairs(end+1,2) = ser2Pt;
-            seqPairs(end,1) = ser1Pt;
-            ser1Pt = ser1Pt+1;
-            ser2Pt = ser2Pt+1;
-        end
-    end
-    close(waitH);
-end            
-            
