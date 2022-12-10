@@ -19,7 +19,7 @@ function [tVid, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
 % used as the timing reference.
 %  * roiVid - an Nx6 array of integers, the ROIs used for detecting
 %  the signal from the synchronization LED. Each row is formatted as: 
-% [startX, startY, width, height, startFrame, stopFrame]. 
+% [xStart, yStart, numRows, numCols, startFrame, stopFrame]. 
 % If only one ROI is to be used, then startInd = 1 and stopInd = inf. 
 %  * chanRef - an interger or string, the channel carrying the
 %  synchronization signal in fPathRef.
@@ -65,8 +65,8 @@ while hasFrame(vid)
     % determine the current ROI
     currROI = roiVid(find((fCounter>=roiVid(:,5))&(fCounter<=roiVid(:,6)),1),1:4);
 
-    ledVid(fCounter) = mean(vecFunc(currFrame(currROI(2):(currROI(2)+currROI(4)),...
-        currROI(1):(currROI(1)+currROI(3)),:)));
+    ledVid(fCounter) = mean(vecFunc(currFrame(currROI(1):(currROI(1)+currROI(3)),...
+        currROI(2):(currROI(2)+currROI(4)),:)));
 end
 close(waitH);
 [b, a] = butter(2,0.1/(vidRate/2),'high');

@@ -34,8 +34,14 @@ NP2Datmap(lf3Path)
 % Get video frame to find ROI
 vid = VideoReader(vidPath);
 currFrame = readFrame(vid);
-image(currFrame);
-roiVid = [34, 140, 16, 10, 1, inf];
+figure;
+imAx = image(currFrame);
+hROI = drawrectangle(imAx);
+%
+% Here you position your rectangle on the image to capture the sync pulse
+% LED
+%
+roiVid = [hROI.Position, 1, inf];
 [tVid, qmVid] = viddattimealign(vidPath,ap0Path,roiVid,{'SY0'});
 
 
