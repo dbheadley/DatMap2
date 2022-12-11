@@ -80,7 +80,7 @@ seqVid = regionprops(ledVid,{'Area' 'PixelIdxList'});
 seqRef = regionprops(syncRef,{'Area' 'PixelIdxList'});
 
 % align pulse sequences
-pulseAligns = MeasureAlignment(vertcat(seqRef.Area),vertcat(seqVid.Area));
+pulseAligns = MeasureAlignment(vertcat(seqRef.Area),vertcat(seqVid.Area),30);
 pulseEdgesVid = cellfun(@(x)x(1),{seqVid(pulseAligns(:,2)).PixelIdxList});
 pulseEdgesRef = cellfun(@(x)x(1),{seqRef(pulseAligns(:,1)).PixelIdxList});
 pulseEdgesVid = pulseEdgesVid(:);

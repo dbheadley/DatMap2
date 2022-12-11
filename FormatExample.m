@@ -34,8 +34,8 @@ NP2Datmap(lf3Path)
 % Get video frame to find ROI
 vid = VideoReader(vidPath);
 currFrame = readFrame(vid);
-figure;
-imAx = image(currFrame);
+figure; imAx = axes();
+image(currFrame);
 hROI = drawrectangle(imAx);
 %
 % Here you position your rectangle on the image to capture the sync pulse
