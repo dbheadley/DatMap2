@@ -3,7 +3,7 @@ function [tVid, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
 % Synchronizes the timing of a video and dat file
 
 %% Syntax
-%# [tOthNew, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
+%# [tVid, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
 
 %% Description
 % A synchonization pulse train shared between a video and dat file, fPathVid and
@@ -26,7 +26,7 @@ function [tVid, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
 
 
 %% OUTPUT
-% * tOthNew - an array of numbers, the new timestamps for fPathVid that are
+% * tVid - an array of numbers, the new timestamps for fPathVid that are
 % aligned with those in fPathRef
 % * qualMetrics - a structure, metrics for the quality of the time
 % alignment.
@@ -115,9 +115,13 @@ tVid = [(-((pulseEdgesVid(1)-1):-1:1)*medDT)+tVid(1) tVid];
 remTPts = length(ledVid)-length(tVid);
 tVid = [tVid tVid(end) + ((1:remTPts)*medDT)];
 
-
 % overwrite old _t file for oth with new time points
 [dirVid, fNameVid, extVid] = fileparts(fPathVid);
-vidFID = fopen(fullfile(dirVid,[fNameVid '_AVI_t.dat']),'w');
-fwrite(vidFID,tVid,'double');
-fclose(vidFID);
+data.traces = {ledVid};
+data.chans = {1, 'led'};
+data.tPts = {tVid};
+writedat(data, fullfile(dirVid,[fNameVid '_AVI']), 'precision','double');
+
+% vidFID = fopen(fullfile(dirVid,[fNameVid '_AVI_t.dat']),'w');
+% fwrite(vidFID,tVid,'double');
+% fclose(vidFID);

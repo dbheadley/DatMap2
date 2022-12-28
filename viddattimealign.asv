@@ -3,7 +3,7 @@ function [tVid, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
 % Synchronizes the timing of a video and dat file
 
 %% Syntax
-%# [tOthNew, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
+%# [tVid, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
 
 %% Description
 % A synchonization pulse train shared between a video and dat file, fPathVid and
@@ -19,14 +19,14 @@ function [tVid, qualMetrics] = viddattimealign(fPathVid,fPathRef,roiVid,chanRef)
 % used as the timing reference.
 %  * roiVid - an Nx6 array of integers, the ROIs used for detecting
 %  the signal from the synchronization LED. Each row is formatted as: 
-% [xStart, yStart, numRows, numCols, startFrame, stopFrame]. 
+% [startX, startY, width, height, startFrame, stopFrame]. 
 % If only one ROI is to be used, then startInd = 1 and stopInd = inf. 
 %  * chanRef - an interger or string, the channel carrying the
 %  synchronization signal in fPathRef.
 
 
 %% OUTPUT
-% * tOthNew - an array of numbers, the new timestamps for fPathVid that are
+% * tVid - an array of numbers, the new timestamps for fPathVid that are
 % aligned with those in fPathRef
 % * qualMetrics - a structure, metrics for the quality of the time
 % alignment.
@@ -65,8 +65,8 @@ while hasFrame(vid)
     % determine the current ROI
     currROI = roiVid(find((fCounter>=roiVid(:,5))&(fCounter<=roiVid(:,6)),1),1:4);
 
-    ledVid(fCounter) = mean(vecFunc(currFrame(currROI(1):(currROI(1)+currROI(3)),...
-        currROI(2):(currROI(2)+currROI(4)),:)));
+    ledVid(fCounter) = mean(vecFunc(currFrame(currROI(2):(currROI(2)+currROI(4)),...
+        currROI(1):(currROI(1)+currROI(3)),:)));
 end
 close(waitH);
 [b, a] = butter(2,0.1/(vidRate/2),'high');
@@ -80,7 +80,7 @@ seqVid = regionprops(ledVid,{'Area' 'PixelIdxList'});
 seqRef = regionprops(syncRef,{'Area' 'PixelIdxList'});
 
 % align pulse sequences
-pulseAligns = MeasureAlignment(vertcat(seqRef.Area),vertcat(seqVid.Area));
+pulseAligns = MeasureAlignment(vertcat(seqRef.Area),vertcat(seqVid.Area),30);
 pulseEdgesVid = cellfun(@(x)x(1),{seqVid(pulseAligns(:,2)).PixelIdxList});
 pulseEdgesRef = cellfun(@(x)x(1),{seqRef(pulseAligns(:,1)).PixelIdxList});
 pulseEdgesVid = pulseEdgesVid(:);
@@ -115,9 +115,23 @@ tVid = [(-((pulseEdgesVid(1)-1):-1:1)*medDT)+tVid(1) tVid];
 remTPts = length(ledVid)-length(tVid);
 tVid = [tVid tVid(end) + ((1:remTPts)*medDT)];
 
-
+* traces - an 1xN cell array, each cell contains the traces 
+%     in an MxT array, with each row containing the trace from a different
+%     channel
+%     * chans - an Mx2 cell array of channel names. The first column is a 
+%     unique channel number, the second is the label for that channel.
+%     * tPts - an 1xN cell array, each cell contains a 1xT numeric vector of
+%     timestamps. Their should be the same number of time stamps as their
+%     are time indices in the traces, or else an error is returned. The
+%     series of N timestamp lists should be monotonically increasing, and
+%     each timestamp should be unique.
 % overwrite old _t file for oth with new time points
 [dirVid, fNameVid, extVid] = fileparts(fPathVid);
+data.traces = {ledVid};
+data.chans = {1, 'led'};
+data.tPts = {tVid};
+writedat(data, fullfile(dirVid,[fNameVid '_AVI_t.dat']), varargin)
+
 vidFID = fopen(fullfile(dirVid,[fNameVid '_AVI_t.dat']),'w');
 fwrite(vidFID,tVid,'double');
 fclose(vidFID);
