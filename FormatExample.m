@@ -61,7 +61,8 @@ syLF3 = readdat(lf2Path, 'twindows', [1000 1010], 'selchans', {'SY0'});
 
 % get pulse LED sequence from video file
 [vidDir, vidName, vidExt] = fileparts(vidPath);
-syVID = readdat(fullfile(vidDir,vidName,'.dat'), 'twindows', [1000 1010]);
+syVID = readdat(fullfile(vidDir,vidName,'.dat'), 'twindows', [1000 1010], ...
+                'precision','double');
 
 figure;
 plot(syAP0.tPts{1},syAP0.traces{1}); hold on;
