@@ -72,5 +72,5 @@ plot(syLF0.tPts{1},syLF0.traces{1}, ':');
 plot(syLF1.tPts{1},syLF1.traces{1}, ':');
 plot(syLF2.tPts{1},syLF2.traces{1}, ':');
 plot(syLF3.tPts{1},syLF3.traces{1}, ':');
-plot(syVid.tPts{1},syVid.traces{1}, 'color','k');
+plot(syVid.tPts{1},s.traces{1}, ':');
 legend({'AP0' 'AP1' 'AP2' 'AP3' 'LF0' 'LF1' 'LF2' 'LF3' 'VID'});
