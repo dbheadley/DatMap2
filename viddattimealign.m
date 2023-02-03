@@ -47,7 +47,7 @@ syncRef = readdat(fPathRef,'selchans', chanRef);
 refTPts = syncRef.tPts{1};
 
 % convert to boolean
-syncRef = syncRef.traces{1}>1;
+syncRef = syncRef.traces{1}>=1;
 
 % load video ROI sync signal
 vid = VideoReader(fPathVid);
