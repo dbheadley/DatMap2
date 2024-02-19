@@ -31,7 +31,15 @@ params = ReadNPMeta([fName '.meta'], fDir);
 
 numChans = str2num(params.nSavedChans);
 numTPts = str2num(params.fileSizeBytes)/(2*numChans);
-sampRate = str2num(params.imSampRate);
+
+if isfield(params, 'imSampRate')
+    sampRate = str2num(params.imSampRate);
+elseif isfield(params, 'niSampRate')
+    sampRate = str2num(params.niSampRate);
+else
+    error('Unknown sample rate')
+end
+
 chanList = params.snsChanMap;
 
 chanNames = regexp(chanList,'\((\w+);\d+\:\d+\)','tokens');
