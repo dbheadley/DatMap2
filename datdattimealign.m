@@ -48,8 +48,8 @@ othInfo = datinfo(fPathOth);
 refTPts = syncRef.tPts{1};
 
 % convert to boolean
-syncOth = syncOth.traces{1}>1;
-syncRef = syncRef.traces{1}>1;
+syncOth = zscore(syncOth.traces{1})>0;
+syncRef = zscore(syncRef.traces{1})>0;
 
 % get pulse duration sequence
 seqOth = regionprops(syncOth,{'Area' 'PixelIdxList'});
